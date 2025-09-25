@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Onboarding Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .employee-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .info-field label { font-weight: bold; margin-bottom: 5px; display: block; }
+    .info-field input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+    .overall-progress { margin-bottom: 20px; }
+    .progress-bar {
+      width: 100%; height: 22px; background: #eee; border-radius: 12px;
+      margin: 6px 0; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: #2ecc71; color: white; text-align: center;
+      line-height: 22px; font-weight: bold; width: 0%;
+    }
+
+    .tabs { margin-bottom: 15px; }
+    .tab-button {
+      padding: 10px 15px; border: none; background: #ddd; cursor: pointer;
+      border-radius: 4px 4px 0 0; font-weight: bold; margin-right: 5px;
+    }
+    .tab-button.active { background: #3498db; color: white; }
+    .tab-content { display: none; border: 1px solid #ccc; border-radius: 0 0 6px 6px; padding: 20px; }
+    .tab-content.active { display: block; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #34495e; color: white; }
+
+    .priority-high { color: #dc3545; font-weight: bold; }
+    .priority-medium { color: #fd7e14; font-weight: bold; }
+    .priority-low { color: #28a745; font-weight: bold; }
+
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-in-progress { background: #fff3cd; color: #856404; }
+    .status-not-started { background: #f8d7da; color: #721c24; }
+
+    /* ✅ New styling for editable action input */
+    .action-input {
+      width: 100%;
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: #fff;
+      outline: none;
+      min-height: 24px;
+      box-sizing: border-box;
+      cursor: text;
+    }
+    .action-input:focus {
+      border-color: #3498db;
+      background: #f0f8ff;
+    }
+
+    select, input, textarea { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
+    textarea { resize: vertical; min-height: 30px; }
+
+    .delete-btn { background: #dc3545; border: none; color: white; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+
+    button { margin-top: 10px; padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .export-btn { background: #28a745; color: white; }
+    .reset-btn { background: #6c757d; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>New Hire Onboarding Tracker</h1>
+
+    <div class="employee-info">
+      <div class="info-field"><label>Employee Name:</label><input type="text" id="employeeName"></div>
+      <div class="info-field"><label>Position:</label><input type="text" id="position"></div>
+      <div class="info-field"><label>Department:</label><input type="text" id="department"></div>
+      <div class="info-field"><label>Start Date:</label><input type="date" id="startDate"></div>
+      <div class="info-field"><label>Manager:</label><input type="text" id="manager"></div>
+      <div class="info-field"><label>HR Contact:</label><input type="text" id="hrContact"></div>
+    </div>
+
+    <div class="overall-progress">
+      <h3>Overall Progress</h3>
+      <div class="progress-bar"><div class="progress-fill" id="overallProgress">0%</div></div>
+      <div><span id="overallStats">0 of 0 items completed</span> • <span id="overallPhases">0 of 4 phases complete</span></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-button active" onclick="showTab('preboarding', this)">Pre-Boarding</button>
+      <button class="tab-button" onclick="showTab('day1', this)">Day 1</button>
+      <button class="tab-button" onclick="showTab('week1', this)">Week 1</button>
+      <button class="tab-button" onclick="showTab('month1', this)">30 Days</button>
+    </div>
+
+    <div id="preboarding" class="tab-content active">
+      <h2>Pre-Boarding</h2>
+      <div class="progress-bar"><div class="progress-fill" id="preboardingProgress">0%</div></div>
+      <table id="preboardingTable">
+        <thead><tr><th>Action Item</th><th>Priority</th><th>Status</th><th>Responsible</th><th>Due Date</th><th>Notes</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="action-cell">Send welcome email with first day info</td>
+            <td class="priority-cell">High</td>
+            <td>
+              <select onchange="updateStatus(this)">
+                <option value="not-started">Not Started</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </td>
+            <td><input type="text" value="HR"></td>
+            <td><input type="date"></td>
+            <td><textarea>Include parking info, dress code, etc.</textarea></td>
+            <td><button class="delete-btn" onclick="deleteRow(this)">X</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <button onclick="addRow('preboardingTable')">Add Row</button>
+    </div>
+
+    <div id="day1" class="tab-content">
+      <h2>Day 1</h2>
+      <div class="progress-bar"><div class="progress-fill" id="day1Progress">0%</div></div>
+      <table id="day1Table"><thead><tr><th>Action Item</th><th>Priority</th><th>Status</th><th>Responsible</th><th>Due Date</th><th>Notes</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      <button onclick="addRow('day1Table')">Add Row</button>
+    </div>
+
+    <div id="week1" class="tab-content">
+      <h2>Week 1</h2>
+      <div class="progress-bar"><div class="progress-fill" id="week1Progress">0%</div></div>
+      <table id="week1Table"><thead><tr><th>Action Item</th><th>Priority</th><th>Status</th><th>Responsible</th><th>Due Date</th><th>Notes</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      <button onclick="addRow('week1Table')">Add Row</button>
+    </div>
+
+    <div id="month1" class="tab-content">
+      <h2>30 Days</h2>
+      <div class="progress-bar"><div class="progress-fill" id="month1Progress">0%</div></div>
+      <table id="month1Table"><thead><tr><th>Action Item</th><th>Priority</th><th>Status</th><th>Responsible</th><th>Due Date</th><th>Notes</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      <button onclick="addRow('month1Table')">Add Row</button>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+      <button onclick="exportToCSV()" class="export-btn">Export to CSV</button>
+      <button onclick="resetCurrentTab()" class="reset-btn">Reset Current Phase</button>
+    </div>
+  </div>
+
+  <script>
+    let currentTab = 'preboarding';
+
+    function makeEditableCells(root = document) {
+      root.querySelectorAll('td.action-cell').forEach(cell => {
+        if (cell.dataset.editable === '1') return;
+        const text = cell.textContent.trim();
+        const div = document.createElement('div');
+        div.className = 'action-input';
+        div.contentEditable = 'true';
+        div.textContent = text || 'New Action Item';
+        cell.textContent = '';
+        cell.appendChild(div);
+        cell.dataset.editable = '1';
+      });
+      root.querySelectorAll('td.priority-cell').forEach(cell => {
+        if (cell.dataset.editable === '1') return;
+        const current = cell.textContent.trim().toLowerCase();
+        const select = document.createElement('select');
+        select.innerHTML = `
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>`;
+        select.value = current.includes('high') ? 'high' : current.includes('low') ? 'low' : 'medium';
+        updatePriorityClass(select);
+        select.onchange = () => updatePriorityClass(select);
+        cell.textContent = '';
+        cell.appendChild(select);
+        cell.dataset.editable = '1';
+      });
+    }
+
+    function updatePriorityClass(select) {
+      select.classList.remove('priority-high', 'priority-medium', 'priority-low');
+      if (select.value === 'high') select.classList.add('priority-high');
+      if (select.value === 'medium') select.classList.add('priority-medium');
+      if (select.value === 'low') select.classList.add('priority-low');
+    }
+
+    function showTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+      currentTab = tabId;
+      makeEditableCells(document.getElementById(tabId));
+      updateProgress();
+    }
+
+    function updateStatus(select) {
+      select.className =
+        select.value === 'completed' ? 'status-completed' :
+        select.value === 'in-progress' ? 'status-in-progress' :
+        'status-not-started';
+      updateProgress();
+    }
+
+    function addRow(tableId) {
+      const tbody = document.getElementById(tableId).querySelector('tbody');
+      const row = tbody.insertRow();
+      row.innerHTML = `
+        <td class="action-cell">New Action Item</td>
+        <td class="priority-cell">Medium</td>
+        <td>
+          <select onchange="updateStatus(this)">
+            <option value="not-started">Not Started</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </td>
+        <td><input type="text"></td>
+        <td><input type="date"></td>
+        <td><textarea></textarea></td>
+        <td><button class="delete-btn" onclick="deleteRow(this)">X</button></td>`;
+      makeEditableCells(row);
+      const statusSel = row.querySelector('select[onchange*="updateStatus"]');
+      if (statusSel) updateStatus(statusSel);
+      updateProgress();
+    }
+
+    function deleteRow(btn) {
+      btn.closest('tr').remove();
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const phases = ['preboarding', 'day1', 'week1', 'month1'];
+      let totalItems = 0;
+      let completedItems = 0;
+      let completedPhases = 0;
+
+      phases.forEach(phase => {
+        const table = document.getElementById(phase + 'Table');
+        if (!table) return;
+
+        const selects = table.querySelectorAll('tbody select[onchange*="updateStatus"]');
+        const total = selects.length;
+        const completed = Array.from(selects).filter(s => s.value === 'completed').length;
+
+        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+        const bar = document.getElementById(phase + 'Progress');
+        if (bar) {
+          bar.style.width = pct + '%';
+          bar.textContent = pct + '%';
+        }
+
+        totalItems += total;
+        completedItems += completed;
+        if (total > 0 && completed === total) completedPhases++;
+      });
+
+      const overallPct = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+      const overallBar = document.getElementById('overallProgress');
+      if (overallBar) {
+        overallBar.style.width = overallPct + '%';
+        overallBar.textContent = overallPct + '%';
+      }
+      document.getElementById('overallStats').textContent = `${completedItems} of ${totalItems} items completed`;
+      document.getElementById('overallPhases').textContent = `${completedPhases} of ${phases.length} phases complete`;
+    }
+
+    function resetCurrentTab() {
+      const table = document.getElementById(currentTab + 'Table');
+      table.querySelectorAll('select[onchange*="updateStatus"]').forEach(s => { s.value = 'not-started'; updateStatus(s); });
+      table.querySelectorAll('input, textarea').forEach(el => el.value = '');
+      updateProgress();
+    }
+
+    function exportToCSV() {
+      let csv = "Employee Information\n";
+      ['employeeName','position','department','startDate','manager','hrContact'].forEach(id => {
+        csv += `${id},${document.getElementById(id).value}\n`;
+      });
+      csv += "\n";
+
+      const phases = ['preboarding','day1','week1','month1'];
+      phases.forEach(phase => {
+        const table = document.getElementById(phase+'Table');
+        if (table) {
+          csv += phase + "\n";
+          const rows = table.querySelectorAll('tbody tr');
+          rows.forEach(row => {
+            const cells = [...row.cells].slice(0,6);
+            const values = cells.map(c => {
+              const input = c.querySelector('input, select, textarea');
+              const div = c.querySelector('.action-input');
+              return div ? div.textContent : input ? input.value : c.textContent.trim();
+            });
+            csv += values.join(',') + "\n";
+          });
+          csv += "\n";
+        }
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = "onboarding.csv"; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      makeEditableCells();
+      document.querySelectorAll('select[onchange*="updateStatus"]').forEach(updateStatus);
+      updateProgress();
+    });
+  </script>
+</body>
+</html>
