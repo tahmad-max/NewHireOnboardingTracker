@@ -113,7 +113,7 @@
       <button class="tab-button active" onclick="showTab('preboarding', this)">Pre-Boarding</button>
       <button class="tab-button" onclick="showTab('day1', this)">Day 1</button>
       <button class="tab-button" onclick="showTab('week1', this)">Week 1</button>
-      <button class="tab-button" onclick="showTab('month1', this)">30 Days</button>
+      <button class="tab-button" onclick="showTab('month3', this)">90 Days</button>
     </div>
 
     <div id="preboarding" class="tab-content active">
@@ -156,8 +156,8 @@
       <button onclick="addRow('week1Table')">Add Row</button>
     </div>
 
-    <div id="month1" class="tab-content">
-      <h2>30 Days</h2>
+    <div id="month3" class="tab-content">
+      <h2>90 Days</h2>
       <div class="progress-bar"><div class="progress-fill" id="month1Progress">0%</div></div>
       <table id="month1Table"><thead><tr><th>Action Item</th><th>Priority</th><th>Status</th><th>Responsible</th><th>Due Date</th><th>Notes</th><th>Actions</th></tr></thead><tbody></tbody></table>
       <button onclick="addRow('month1Table')">Add Row</button>
@@ -388,4 +388,5 @@ function importCSV(csvText) {
   </script>
 </body>
 </html>
+
 
