@@ -166,6 +166,8 @@
     <div style="margin-top: 20px; text-align: center;">
       <button onclick="exportToCSV()" class="export-btn">Export to CSV</button>
       <button onclick="resetCurrentTab()" class="reset-btn">Reset Current Phase</button>
+      <button onclick="document.getElementById('csvFileInput').click()" class="export-btn">Import CSV</button>
+      <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCSVFile(event)">
     </div>
   </div>
 
@@ -328,6 +330,55 @@
       a.href = url; a.download = "onboarding.csv"; a.click();
       URL.revokeObjectURL(url);
     }
+function handleCSVFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    importCSV(text);
+  };
+  reader.readAsText(file);
+}
+
+function importCSV(csvText) {
+  const lines = csvText.split("\n").map(l => l.trim()).filter(l => l);
+  let phase = '';
+  let currentTable = null;
+
+  lines.forEach(line => {
+    if (['preboarding','day1','week1','month1'].includes(line.toLowerCase())) {
+      phase = line.toLowerCase();
+      currentTable = document.getElementById(`${phase}Table`).querySelector('tbody');
+      currentTable.innerHTML = ''; // clear existing rows
+      return;
+    }
+
+    if (phase && currentTable) {
+      const [action, priority, status, responsible, due, notes] = line.split(",");
+      const row = currentTable.insertRow();
+      row.innerHTML = `
+        <td class="action-cell">${action || 'New Action Item'}</td>
+        <td class="priority-cell">${priority || 'Medium'}</td>
+        <td>
+          <select onchange="updateStatus(this)">
+            <option value="not-started" ${status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+            <option value="in-progress" ${status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+            <option value="completed" ${status === 'Completed' ? 'selected' : ''}>Completed</option>
+          </select>
+        </td>
+        <td><input type="text" value="${responsible || ''}"></td>
+        <td><input type="date" value="${due || ''}"></td>
+        <td><textarea>${notes || ''}</textarea></td>
+        <td><button class="delete-btn" onclick="deleteRow(this)">X</button></td>
+      `;
+    }
+  });
+
+  makeEditableCells();
+  updateProgress();
+}
 
     document.addEventListener('DOMContentLoaded', () => {
       makeEditableCells();
@@ -337,3 +388,4 @@
   </script>
 </body>
 </html>
+
