@@ -158,9 +158,9 @@
 
     <div id="month3" class="tab-content">
       <h2>90 Days</h2>
-      <div class="progress-bar"><div class="progress-fill" id="month1Progress">0%</div></div>
-      <table id="month1Table"><thead><tr><th>Action Item</th><th>Priority</th><th>Status</th><th>Responsible</th><th>Due Date</th><th>Notes</th><th>Actions</th></tr></thead><tbody></tbody></table>
-      <button onclick="addRow('month1Table')">Add Row</button>
+      <div class="progress-bar"><div class="progress-fill" id="month3Progress">0%</div></div>
+      <table id="month3Table"><thead><tr><th>Action Item</th><th>Priority</th><th>Status</th><th>Responsible</th><th>Due Date</th><th>Notes</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      <button onclick="addRow('month3Table')">Add Row</button>
     </div>
 
     <div style="margin-top: 20px; text-align: center;">
@@ -257,7 +257,7 @@
     }
 
     function updateProgress() {
-      const phases = ['preboarding', 'day1', 'week1', 'month1'];
+      const phases = ['preboarding', 'day1', 'week1', 'month3'];
       let totalItems = 0;
       let completedItems = 0;
       let completedPhases = 0;
@@ -306,7 +306,7 @@
       });
       csv += "\n";
 
-      const phases = ['preboarding','day1','week1','month1'];
+      const phases = ['preboarding','day1','week1','month3'];
       phases.forEach(phase => {
         const table = document.getElementById(phase+'Table');
         if (table) {
@@ -348,7 +348,7 @@ function importCSV(csvText) {
   let currentTable = null;
 
   lines.forEach(line => {
-    if (['preboarding','day1','week1','month1'].includes(line.toLowerCase())) {
+    if (['preboarding','day1','week1','month3'].includes(line.toLowerCase())) {
       phase = line.toLowerCase();
       currentTable = document.getElementById(`${phase}Table`).querySelector('tbody');
       currentTable.innerHTML = ''; // clear existing rows
@@ -388,5 +388,6 @@ function importCSV(csvText) {
   </script>
 </body>
 </html>
+
 
 
